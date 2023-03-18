@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"azl-product-api/internal/domain/entities"
+	"azl-vote-api/internal/domain/entities"
 	"database/sql"
 )
 
