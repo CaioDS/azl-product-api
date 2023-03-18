@@ -1,10 +1,10 @@
 azl-vote-api
 
-##Azure Learning - High scale API with Golang and Messaging services
+## Azure Learning - High scale API with Golang and Messaging services
 
-####Objective: This API will simulate a massive voting system.
+#### Objective: This API will simulate a massive voting system.
 
-####Technologies:
+#### Technologies:
 
 - Golang
 - Azure Service Bus
