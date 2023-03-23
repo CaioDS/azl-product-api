@@ -25,3 +25,25 @@ func (contestRepository *ContestRepository) Create(entity entities.ContestEntity
 
 	return nil
 }
+
+func (contestRepository *ContestRepository) FindAll() ([]*entities.ContestEntity, error) {
+	rows, error := contestRepository.DbConnection.Query("SELECT id, initial_date, final_date, active FROM Contests")
+	if error != nil {
+		return nil, error
+	}
+	defer rows.Close()
+
+	var contests []*entities.ContestEntity
+	for rows.Next() {
+		var contest entities.ContestEntity
+
+		error = rows.Scan(&contest.Id, &contest.InitialDate, &contest.FinalDate, &contest.Active)
+		if error != nil {
+			return nil, error
+		}
+
+		contests = append(contests, &contest)
+	}
+
+	return contests, nil
+}
