@@ -1,8 +1,10 @@
 package repository
 
-import "azl-vote-api/internal/domain/entities"
+import (
+	"azl-vote-api/internal/domain/entities"
+)
 
 type ContestRepository interface {
-	Create(entities.ContestEntity) error
+	Create(*entities.ContestEntity) error
 	FindAll() ([]*entities.ContestEntity, error)
 }

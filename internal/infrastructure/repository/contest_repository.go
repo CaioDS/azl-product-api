@@ -15,10 +15,17 @@ func NewContestRepository(dbConnection *sql.DB) *ContestRepository {
 	}
 }
 
-func (contestRepository *ContestRepository) Create(entity entities.ContestEntity) error {
-	_, error := contestRepository.DbConnection.Exec("INSERT INTO Contests(id, initial_date, final_date, active) VALUES (?,?,?,?)",
-		entity.Id, entity.InitialDate.String(), entity.FinalDate.String(), entity.Active)
+func (contestRepository *ContestRepository) Create(entity *entities.ContestEntity) error {
+	dateLayout := "2006-01-02 15:04:05 -07:00"
+	parsedInitialDate := entity.InitialDate.Format(dateLayout)
+	parsedFinalDate := entity.FinalDate.Format(dateLayout)
 
+	statement, error := contestRepository.DbConnection.Prepare("INSERT INTO Contests(id, initial_date, final_date, active) VALUES (@p1, @p2, @p3, @p4)")
+	if error != nil {
+		return error
+	}
+
+	_, error = statement.Exec(entity.Id, parsedInitialDate, parsedFinalDate, entity.Active)
 	if error != nil {
 		return error
 	}
