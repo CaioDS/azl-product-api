@@ -7,4 +7,5 @@ azl-vote-api
 #### Technologies:
 
 - Golang
-- Azure Service Bus
+- RabbitMQ
+- Azure VM's
