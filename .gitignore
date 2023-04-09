@@ -1,1 +1,3 @@
 makefile
+.env
+docker-compose.yml

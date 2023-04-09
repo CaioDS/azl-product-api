@@ -6,10 +6,12 @@ import (
 	diHandlers "azl-vote-api/internal/infrastructure/configuration/dependency_injections/handlers"
 	diRepository "azl-vote-api/internal/infrastructure/configuration/dependency_injections/repository"
 	diUsecase "azl-vote-api/internal/infrastructure/configuration/dependency_injections/usecase"
+	envVariablesConfig "azl-vote-api/internal/infrastructure/configuration/environment_variables"
 	routerConfiguration "azl-vote-api/internal/infrastructure/configuration/router"
 	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/go-chi/chi/v5"
@@ -19,7 +21,9 @@ import (
 func main() {
 	container := dig.New()
 
-	dbConnection, error := sql.Open("sqlserver", "server=x,1433;user id=sa;password=x;database=x;")
+	envVariablesConfig.SetupEnvironmentVariables()
+
+	dbConnection, error := sql.Open("sqlserver", os.Getenv("DB_CONNECTION"))
 	if error != nil {
 		panic(error)
 	}
@@ -47,16 +51,22 @@ func main() {
 		panic(error)
 	}
 
+	error = container.Provide(diHandlers.ProvideHealthCheckHandlers)
+	if error != nil {
+		panic(error)
+	}
+
 	error = container.Provide(chi.NewRouter)
 	if error != nil {
 		panic(error)
 	}
 
-	error = container.Invoke(func(router *chi.Mux, contestHandler handlers.ContestsHandlers) {
+	error = container.Invoke(func(router *chi.Mux, contestHandler handlers.ContestsHandlers, healthCheckHandler handlers.HealthCheckHandlers) {
 		routerConfiguration.SetContestsRoutes(router, contestHandler)
+		routerConfiguration.SetHealthCheckRoutes(router, healthCheckHandler)
 
-		fmt.Println("Estamos ouvindo")
-		http.ListenAndServe(":8000", router)
+		fmt.Println("Running Azl-Vote-API on 8080 Port")
+		http.ListenAndServe(":80", router)
 
 	})
 	if error != nil {
