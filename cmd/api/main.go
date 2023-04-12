@@ -6,7 +6,6 @@ import (
 	diHandlers "azl-vote-api/internal/infrastructure/configuration/dependency_injections/handlers"
 	diRepository "azl-vote-api/internal/infrastructure/configuration/dependency_injections/repository"
 	diUsecase "azl-vote-api/internal/infrastructure/configuration/dependency_injections/usecase"
-	envVariablesConfig "azl-vote-api/internal/infrastructure/configuration/environment_variables"
 	routerConfiguration "azl-vote-api/internal/infrastructure/configuration/router"
 	"database/sql"
 	"fmt"
@@ -21,7 +20,7 @@ import (
 func main() {
 	container := dig.New()
 
-	envVariablesConfig.SetupEnvironmentVariables()
+	//envVariablesConfig.SetupEnvironmentVariables()
 
 	dbConnection, error := sql.Open("sqlserver", os.Getenv("DB_CONNECTION"))
 	if error != nil {
