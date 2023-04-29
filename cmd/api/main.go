@@ -64,7 +64,7 @@ func main() {
 		routerConfiguration.SetContestsRoutes(router, contestHandler)
 		routerConfiguration.SetHealthCheckRoutes(router, healthCheckHandler)
 
-		fmt.Println("Running Azl-Vote-API on 8080 Port")
+		fmt.Println("Running Azl-Vote-API on 80 Port")
 		http.ListenAndServe(":80", router)
 
 	})
