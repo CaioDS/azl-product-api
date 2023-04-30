@@ -5,6 +5,7 @@ import (
 )
 
 type ContestRepository interface {
-	Create(*entities.ContestEntity) error
 	FindAll() ([]*entities.ContestEntity, error)
+	Create(*entities.ContestEntity) error
+	DeleteById(*entities.ContestEntity) error
 }

@@ -15,24 +15,6 @@ func NewContestRepository(dbConnection *sql.DB) *ContestRepository {
 	}
 }
 
-func (contestRepository *ContestRepository) Create(entity *entities.ContestEntity) error {
-	dateLayout := "2006-01-02 15:04:05 -07:00"
-	parsedInitialDate := entity.InitialDate.Format(dateLayout)
-	parsedFinalDate := entity.FinalDate.Format(dateLayout)
-
-	statement, error := contestRepository.DbConnection.Prepare("INSERT INTO Contests(id, initial_date, final_date, active) VALUES (@p1, @p2, @p3, @p4)")
-	if error != nil {
-		return error
-	}
-
-	_, error = statement.Exec(entity.Id, parsedInitialDate, parsedFinalDate, entity.Active)
-	if error != nil {
-		return error
-	}
-
-	return nil
-}
-
 func (contestRepository *ContestRepository) FindAll() ([]*entities.ContestEntity, error) {
 	rows, error := contestRepository.DbConnection.Query("SELECT id, initial_date, final_date, active FROM Contests")
 	if error != nil {
@@ -53,4 +35,36 @@ func (contestRepository *ContestRepository) FindAll() ([]*entities.ContestEntity
 	}
 
 	return contests, nil
+}
+
+func (contestRepository *ContestRepository) Create(entity *entities.ContestEntity) error {
+	dateLayout := "2006-01-02 15:04:05 -07:00"
+	parsedInitialDate := entity.InitialDate.Format(dateLayout)
+	parsedFinalDate := entity.FinalDate.Format(dateLayout)
+
+	statement, error := contestRepository.DbConnection.Prepare("INSERT INTO Contests(id, initial_date, final_date, active) VALUES (@p1, @p2, @p3, @p4)")
+	if error != nil {
+		return error
+	}
+
+	_, error = statement.Exec(entity.Id, parsedInitialDate, parsedFinalDate, entity.Active)
+	if error != nil {
+		return error
+	}
+
+	return nil
+}
+
+func (contestRepository *ContestRepository) DeleteById(entity *entities.ContestEntity) error {
+	statement, error := contestRepository.DbConnection.Prepare("DELETE FROM Contests WHERE id=@p1")
+	if error != nil {
+		return error
+	}
+
+	_, error = statement.Exec(entity.Id)
+	if error != nil {
+		return error
+	}
+
+	return nil
 }
