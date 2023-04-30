@@ -55,16 +55,29 @@ func (contestRepository *ContestRepository) Create(entity *entities.ContestEntit
 	return nil
 }
 
-func (contestRepository *ContestRepository) DeleteById(entity *entities.ContestEntity) error {
-	statement, error := contestRepository.DbConnection.Prepare("DELETE FROM Contests WHERE id=@p1")
+func (contestRepository *ContestRepository) DeleteById(entity *entities.ContestEntity) (*[]entities.ContestEntity, error) {
+	statement, error := contestRepository.DbConnection.Prepare("DELETE FROM Contests OUTPUT deleted.id WHERE id=@p1")
 	if error != nil {
-		return error
+		return nil, error
 	}
 
-	_, error = statement.Exec(entity.Id)
+	result, error := statement.Query(entity.Id)
 	if error != nil {
-		return error
+		return nil, error
+	}
+	defer result.Close()
+
+	var deletedRows []entities.ContestEntity
+	for result.Next() {
+		var row entities.ContestEntity
+
+		error = result.Scan(&row.Id, &row.InitialDate, &row.FinalDate, &row.Active)
+		if error != nil {
+			return nil, error
+		}
+
+		deletedRows = append(deletedRows, row)
 	}
 
-	return nil
+	return &deletedRows, nil
 }

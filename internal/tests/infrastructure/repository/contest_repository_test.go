@@ -71,18 +71,19 @@ func TestShouldBeFindAllContests(test *testing.T) {
 
 func TestShouldBeDeleteContestById(test *testing.T) {
 	db, mock := NewRepositoryMock()
-	contestRepository := repository.NewContestRepository(db)
 
+	contestRepository := repository.NewContestRepository(db)
 	input := entities.CreateContestEntity(time.Now(), time.Now())
 
-	mock.NewRows([]string{"id", "initial_date", "final_date", "active"}).
+	rows := mock.NewRows([]string{"id", "initial_date", "final_date", "active"}).
 		AddRow(input.Id, input.InitialDate, input.FinalDate, input.Active)
-	mock.ExpectPrepare("DELETE FROM Contests WHERE id=@p1").
-		ExpectExec().
-		WithArgs(input.Id).
-		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	error := contestRepository.DeleteById(input)
+	mock.ExpectPrepare("DELETE FROM Contests OUTPUT deleted.id WHERE id=@p1").
+		ExpectQuery().
+		WithArgs(input.Id).
+		WillReturnRows(rows)
+
+	result, error := contestRepository.DeleteById(input)
 	if error != nil {
 		test.Errorf("Ocorreu um erro inesperado ao deletar o constest: %s", error)
 	}
@@ -91,8 +92,32 @@ func TestShouldBeDeleteContestById(test *testing.T) {
 	if error != nil {
 		test.Errorf("Asserts falharam: %s", error)
 	}
+
+	assert.Equal(test, (*result)[0], *input)
 }
 
-func TestUnexistsIdErrorDeleteContestById(test *testing.T) {
-	//pending
+func TestUnexistsIdErrorOnDeleteContestById(test *testing.T) {
+	db, mock := NewRepositoryMock()
+
+	contestRepository := repository.NewContestRepository(db)
+	input := entities.CreateContestEntity(time.Now(), time.Now())
+
+	rows := mock.NewRows([]string{"id", "initial_date", "final_date", "active"})
+	mock.ExpectPrepare("DELETE FROM Contests OUTPUT deleted.id WHERE id=@p1").
+		ExpectQuery().
+		WithArgs(input.Id).
+		WillReturnRows(rows)
+
+	result, error := contestRepository.DeleteById(input)
+	if error != nil {
+		test.Errorf("Ocorreu um erro inesperado ao deletar o constest: %s", error)
+	}
+
+	error = mock.ExpectationsWereMet()
+	if error != nil {
+		test.Errorf("Asserts falharam: %s", error)
+	}
+
+	assert.NotEqual(test, (*result), *input)
+	assert.Empty(test, result)
 }
